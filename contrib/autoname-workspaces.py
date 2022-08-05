@@ -26,7 +26,7 @@ def icon_for_window(window):
     if window.app_id is not None and len(window.app_id) > 0:
         name = window.app_id.lower()
     elif window.window_class is not None and len(window.window_class) > 0:
-        name =  window.window_class.lower()
+        name = window.window_class.lower()
 
     if name in WINDOW_ICONS:
         return WINDOW_ICONS[name]
@@ -44,7 +44,9 @@ def rename_workspaces(ipc):
                 if not ARGUMENTS.duplicates and icon in icon_tuple:
                     continue
                 icon_tuple += (icon,)
-        name_parts["icons"] = "  ".join(icon_tuple) + " "
+        name_parts["icons"] = "  ".join(icon_tuple)
+        if not ARGUMENTS.remove_whitespace and name_parts["icons"]:
+            name_parts["icons"] += " "
         new_name = construct_workspace_name(name_parts)
         ipc.command('rename workspace "%s" to "%s"' % (workspace.name, new_name))
 
@@ -84,17 +86,23 @@ if __name__ == "__main__":
         description="This script automatically changes the workspace name in sway depending on your open applications."
     )
     parser.add_argument(
-        "--duplicates",
         "-d",
+        "--duplicates",
         action="store_true",
         help="Set it when you want an icon for each instance of the same application per workspace.",
     )
     parser.add_argument(
-        "--logfile",
         "-l",
+        "--logfile",
         type=str,
         default="/tmp/sway-autoname-workspaces.log",
         help="Path for the logfile.",
+    )
+    parser.add_argument(
+        "-rw",
+        "--remove-whitespace",
+        action="store_true",
+        help="Set it to remove the trailing whitespace after the icons in the workspace's name."
     )
     args = parser.parse_args()
     global ARGUMENTS
